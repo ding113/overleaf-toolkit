@@ -4,15 +4,12 @@ FROM tuetenk0pp/sharelatex-full:latest
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     MONGO_VERSION=6.0 \
-    REDIS_VERSION=6.2 \
-    NODE_VERSION=18
+    REDIS_VERSION=6.2
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    # MongoDB dependencies
-    wget \
-    gnupg \
-    lsb-release \
+    # MongoDB (use Ubuntu package for compatibility)
+    mongodb \
     # Redis dependencies
     build-essential \
     tcl \
@@ -20,15 +17,6 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     # Health check tools
     curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install MongoDB 6.0
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | apt-key add - \
-    && echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list \
-    && apt-get update \
-    && apt-get install -y mongodb-org \
-    && mkdir -p /data/mongo \
-    && chown mongodb:mongodb /data/mongo \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Redis 6.2
@@ -43,6 +31,8 @@ RUN cd /tmp \
 
 # Create data directories
 RUN mkdir -p /data/mongo /data/redis /var/lib/overleaf /var/log/supervisor \
+    && useradd -r -s /bin/false mongodb || true \
+    && useradd -r -s /bin/false redis || true \
     && chown -R mongodb:mongodb /data/mongo \
     && chown -R redis:redis /data/redis \
     && chown -R sharelatex:sharelatex /var/lib/overleaf
