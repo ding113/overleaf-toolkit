@@ -20,9 +20,6 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     # Health check tools
     curl \
-    # Node.js for health check service
-    nodejs \
-    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Install MongoDB 6.0
